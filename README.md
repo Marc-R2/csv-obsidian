@@ -1,3 +1,6 @@
+This repository will be put as archived because this version doesn't work anymore either and as I don't use this extension anymore nor have I the time to do so, I prefer to put it as archived with this little note and let people wanting to see what little change I did see and use if it work for them.
+Good luck on your search for an alternative or to make this one work !
+
 # CSV Editor Obsidian Plugin
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/Sayama3/csv-obsidian?style=for-the-badge&sort=semver)](https://github.com/Sayama3/csv-obsidian/releases/latest)
 ![GitHub All Releases](https://img.shields.io/github/downloads/Sayama3/csv-obsidian/total?style=for-the-badge)
