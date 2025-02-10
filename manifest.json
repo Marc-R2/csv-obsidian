@@ -1,12 +1,12 @@
 {
   "id": "csv-obsidian-second",
   "name": "CSV Editor 2",
-  "author": "Sayama3",
-  "authorUrl": "https://github.com/Sayama3",
+  "author": "Marc-R2",
+  "authorUrl": "https://github.com/Marc-R2",
   "description": "Edit CSV files in Obsidian",
   "isDesktopOnly": false,
-  "version": "0.0.3",
+  "version": "0.0.4",
   "minAppVersion": "0.14.5",
-  "repo": "Sayama3/csv-obsidian",
+  "repo": "Marc-R2/csv-obsidian",
   "branch": "main"
 }

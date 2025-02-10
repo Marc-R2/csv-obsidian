@@ -15,12 +15,12 @@ import "./styles.scss";
 import {ParseError, ParseMeta, ParseResult} from "papaparse";
 import {error} from "handsontable/helpers";
 
-function CreateEmptyCSV(row = 1, col = 1): string{
+function CreateEmptyCSV(row = 1, col = 1): string {
 	let csv = "";
 	for (let x = 0; x < col; x++) {
 		for (let y = 0; y < row; y++) {
 			csv += "\"\"";
-			if (y<row-1) csv += ",";
+			if (y < row - 1) csv += ",";
 		}
 		csv += "\n";
 	}
@@ -33,7 +33,7 @@ export default class CsvPlugin extends Plugin {
 		//Create menu button to create a CSV
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
-				if(file instanceof TFolder){
+				if (file instanceof TFolder) {
 					const folder = file as TFolder;
 					menu.addItem((item) => {
 						item
@@ -43,13 +43,13 @@ export default class CsvPlugin extends Plugin {
 								//Searching if there is not already csv files named "Untitled".
 								let index = 0;
 								for (const child of folder.children) {
-									if (child instanceof TFile){
+									if (child instanceof TFile) {
 										const file = child as TFile;
-										if (file.extension === "csv" && file.basename.contains("Untitled")){
+										if (file.extension === "csv" && file.basename.contains("Untitled")) {
 											const split = file.basename.split(" ");
-											if (split.length > 1 && !isNaN(parseInt(split[1]))){
+											if (split.length > 1 && !isNaN(parseInt(split[1]))) {
 												const i = parseInt(split[1]);
-												index = i >= index ? i+1:index;
+												index = i >= index ? i + 1 : index;
 											} else {
 												index = index > 0 ? index : 1;
 											}
@@ -57,8 +57,8 @@ export default class CsvPlugin extends Plugin {
 									}
 								}
 								//Creating the file.
-								const fileName = `Untitled${index>0?` ${index}`:""}`;
-								await this.app.vault.create(folder.path+`/${fileName}.csv`, CreateEmptyCSV(4,4));
+								const fileName = `Untitled${index > 0 ? ` ${index}` : ""}`;
+								await this.app.vault.create(folder.path + `/${fileName}.csv`, CreateEmptyCSV(4, 4));
 								new Notice(`The file "${fileName}" has been created in the folder "${folder.path}".`);
 
 								// We're not opening the file as it cause error.
@@ -193,7 +193,7 @@ class CsvView extends TextFileView {
 			afterChange: this.hotChange,
 			afterColumnSort: this.requestAutoSave,
 			afterColumnMove: this.requestAutoSave,
-			afterRowMove:   this.requestAutoSave,
+			afterRowMove: this.requestAutoSave,
 			afterCreateCol: this.requestAutoSave,
 			afterCreateRow: this.requestAutoSave,
 			afterRemoveCol: this.requestAutoSave,
@@ -224,30 +224,30 @@ class CsvView extends TextFileView {
 			width: "100%",
 			// stretchH: 'last'
 		};
-		this.hot = new ExtHandsontable(hotContainer, this.hotSettings, {leaf:this.leaf});
+		this.hot = new ExtHandsontable(hotContainer, this.hotSettings, {leaf: this.leaf});
 		this.hotExport = this.hot.getPlugin("exportFile");
 		this.hotState = this.hot.getPlugin("persistentState");
 		this.hotFilters = this.hot.getPlugin("filters");
 	}
 
 	requestAutoSave = (): void => {
-		if(this.autoSaveValue){
+		if (this.autoSaveValue) {
 			this.requestSave();
 		}
-	}
+	};
 
 	requestManualSave = (): void => {
-		if(!this.autoSaveValue) {
+		if (!this.autoSaveValue) {
 			this.requestSave();
 		}
-	}
+	};
 
 	hotChange = (changes: Handsontable.CellChange[], source: Handsontable.ChangeSource): void => {
 		if (source === "loadData") {
 			return; //don't save this change
 		}
 
-		if(this.requestAutoSave) {
+		if (this.requestAutoSave) {
 			this.requestAutoSave();
 		} else {
 			console.error("Couldn't auto save...");
@@ -256,7 +256,7 @@ class CsvView extends TextFileView {
 
 	// get the new file contents
 	override getViewData(): string {
-		if(this.hot && !this.hot.isDestroyed) {
+		if (this.hot && !this.hot.isDestroyed) {
 			// get the *source* data (i.e. unfiltered)
 			const data = this.hot.getSourceDataArray();
 			if (this.hotSettings.colHeaders !== true) {
@@ -267,43 +267,42 @@ class CsvView extends TextFileView {
 		} else {
 			return this.data;
 		}
-	};
+	}
 
 	// Setting the view from the previously set data
 	override setViewData(data: string, clear: boolean): void {
 		this.data = data;
 		this.loadingBar.show();
 		debounce(() => this.loadDataAsync(data)
-				.then(() => {
-					console.log("Loading data correctly.");
-					this.loadingBar.hide();
-				})
-				.catch((e: any) => {
-					const ErrorTimeout = 5000;
-					this.loadingBar.hide();
-					if (Array.isArray(e)){
-						console.error(`Catch ${e.length > 1 ? "multiple errors" : "an error"} during the loading of the data from "${this.file.name}".`);
-						for (const error of e) {
-							if (error.hasOwnProperty("message")){
-								console.error(error["message"], error);
-								new Notice(error["message"],ErrorTimeout);
-							} else {
-								console.error(JSON.stringify(error), error);
-								new Notice(JSON.stringify(error),ErrorTimeout);
-							}
+			.then(() => {
+				console.log("Loading data correctly.");
+				this.loadingBar.hide();
+			})
+			.catch((e: any) => {
+				const ErrorTimeout = 5000;
+				this.loadingBar.hide();
+				if (Array.isArray(e)) {
+					console.error(`Catch ${e.length > 1 ? "multiple errors" : "an error"} during the loading of the data from "${this.file.name}".`);
+					for (const error of e) {
+						if (error.hasOwnProperty("message")) {
+							console.error(error["message"], error);
+							new Notice(error["message"], ErrorTimeout);
+						} else {
+							console.error(JSON.stringify(error), error);
+							new Notice(JSON.stringify(error), ErrorTimeout);
 						}
-					} else {
-						new Notice(JSON.stringify(e),ErrorTimeout);
-						console.error(`Catch error during the loading of the data from ${this.file.name}\n`,e);
 					}
-					this.hot?.destroy();
-					this.hot = undefined;
-					//Close the window
-					this.app.workspace.activeLeaf.detach();
-				})
-			, 50, true).apply(this);
+				} else {
+					new Notice(JSON.stringify(e), ErrorTimeout);
+					console.error(`Catch error during the loading of the data from ${this.file.name}\n`, e);
+				}
+				this.hot?.destroy();
+				this.hot = undefined;
+				// Close the window
+				this.app.workspace.getLeaf().detach();
+			}), 50, true,).apply(this);
 		return;
-	};
+	}
 
 	loadDataAsync(data: string): Promise<void> {
 		return new Promise<void>((resolve: (value: (PromiseLike<void> | void)) => void, reject: ParseError[] | any) => {
@@ -315,8 +314,8 @@ class CsvView extends TextFileView {
 			if (data.charCodeAt(0) === 0xFEFF) data = data.slice(1);
 
 			// parse the incoming data string
-			Papa.parse<string[]>(data,{
-				header:false,
+			Papa.parse<string[]>(data, {
+				header: false,
 				complete: (results: ParseResult<string[]>) => {
 					//Handle the errors
 					if (results.errors !== undefined && results.errors.length !== 0) {
@@ -332,7 +331,7 @@ class CsvView extends TextFileView {
 					this.hot.updateSettings(this.hotSettings);
 
 					// load the persistent setting for headings
-					const hasHeadings = { value: false };
+					const hasHeadings = {value: false};
 					this.hotState.loadValue("hasHeadings", hasHeadings);
 					this.headerToggle.setValue(hasHeadings.value);
 
@@ -342,16 +341,16 @@ class CsvView extends TextFileView {
 				}
 			});
 		});
-	};
+	}
 
 	override clear() {
 		// clear the view content
 		this.hot?.clear();
 		this.hot?.clearUndo();
-	};
+	}
 
 	//Unloading the data
-	override async onUnloadFile(file: TFile): Promise<void>{
+	override async onUnloadFile(file: TFile): Promise<void> {
 		await super.onUnloadFile(file);
 		return;
 	}
@@ -360,9 +359,9 @@ class CsvView extends TextFileView {
 		const SaveNoticeTimeout = 1000;
 		try {
 			await super.save(clear);
-			new Notice(`"${this.file.name}" was saved.`,SaveNoticeTimeout);
+			new Notice(`"${this.file.name}" was saved.`, SaveNoticeTimeout);
 		} catch (e) {
-			new Notice(`"${this.file.name}" couldn't be saved.`,SaveNoticeTimeout);
+			new Notice(`"${this.file.name}" couldn't be saved.`, SaveNoticeTimeout);
 			throw e;
 		}
 	}
@@ -383,9 +382,7 @@ class CsvView extends TextFileView {
 				// update the settings
 				this.hot.updateSettings(this.hotSettings);
 			}
-		}
-		// turning headers off
-		else {
+		} else { // turning headers off
 			// we have headers
 			if (this.hotSettings.colHeaders !== true) {
 				// get the data
@@ -406,10 +403,10 @@ class CsvView extends TextFileView {
 	};
 
 	// DO NOT TRANSFORM THIS INTO A REAL FUNCTION
-	markdownCellRenderer = (instance: Handsontable, TD: HTMLTableCellElement, row: number, col: number, prop: string | number, value: Handsontable.CellValue, cellProperties: Handsontable.CellProperties): HTMLTableCellElement | void => {
+	markdownCellRenderer = async (instance: Handsontable, TD: HTMLTableCellElement, row: number, col: number, prop: string | number, value: Handsontable.CellValue, cellProperties: Handsontable.CellProperties): Promise<HTMLTableCellElement | void> => {
 		TD.innerHTML = "";
-		if (cellProperties.className){
-			const htmlClass: string[] = Array.isArray(cellProperties.className)?cellProperties.className:cellProperties.className.split(" ");
+		if (cellProperties.className) {
+			const htmlClass: string[] = Array.isArray(cellProperties.className) ? cellProperties.className : cellProperties.className.split(" ");
 			TD.style.textAlign = "";
 			for (const c of htmlClass) {
 				switch (c) {
@@ -439,7 +436,7 @@ class CsvView extends TextFileView {
 				}
 			}
 		}
-		MarkdownRenderer.renderMarkdown(value, TD, this.file.path || "", this || null);
+		await MarkdownRenderer.render(this.app, value, TD, this.file?.path || "", this || null);
 		return TD;
 	};
 
@@ -468,7 +465,7 @@ class CsvView extends TextFileView {
 class ExtHandsontable extends Handsontable {
 	extContext: any;
 
-	constructor(element: Element, options: Handsontable.GridSettings, context:any) {
+	constructor(element: Element, options: Handsontable.GridSettings, context: any) {
 		super(element, options);
 		this.extContext = context;
 	}
